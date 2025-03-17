@@ -1,5 +1,5 @@
-Test Pattern Record
--
+# Test Pattern Record : 
+
 # PATTERN img5.pattern  
 Used Cycle:      24444  
 Get Return: C1( 8,12),C2( 2,10)  
