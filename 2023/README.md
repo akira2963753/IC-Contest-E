@@ -26,6 +26,6 @@ Get Return: C1( 5,11),C2(11, 6)
 cover =  28, optimum =  28  
    
 
-RUN CYCLE =     146919 
-Cover total = 170/170  
+RUN CYCLE =     146919   
+Cover total = 170/170    
 
