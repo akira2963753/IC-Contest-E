@@ -48,7 +48,7 @@ always @(*) begin
 		Conv: next_state = (iaddr==12'd4095&&load==1'b1)? Write : Conv;
 		Write : next_state = (caddr_wr==12'd4095)? MaxPool : Write;
 		MaxPool : next_state = (iaddr==12'd4030)? Finish : MaxPool;
-		Finish: next_state = IDLE;
+		Finish: next_state = Finish;
 		default;
 	endcase
 end
@@ -62,7 +62,7 @@ end
 
 //Set iaddr 
 always @(posedge clk) begin
-	if(state==IDLE) iaddr <= 12'd0;
+	if(reset) iaddr <= 12'd0;
 	else if(state==Read||(state==Write&&next_state!=MaxPool)) iaddr <= iaddr + 12'd1;
 	else if(state==Conv&&iaddr==12'd4095&&load==1'b1) iaddr <= 12'd0;
 	else if(state==Conv&&load==1'b1) iaddr <= iaddr + 12'd1;
@@ -75,7 +75,7 @@ always @(posedge clk) begin
 end
 
 //Set Counter
-always @(posedge clk) begin
+always @(posedge clk ) begin
 	if(state==IDLE) {counter,load} <= 5'd0;
 	else if(counter==4'd8&&load==1'b0) begin //讓他在數到第八後變 0 
 		load <= 1'b1;
