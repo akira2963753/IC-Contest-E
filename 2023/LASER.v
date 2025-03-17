@@ -29,13 +29,16 @@ reg [3:0] Max_C1X;
 reg [3:0] Max_C1Y;
 reg [3:0] Max_C2X;
 reg [3:0] Max_C2Y;
-
+wire [12:0] distance1,distance2;
 //Set difference
 assign x_diff1 = (C1X >= obj_x[point_counter])? C1X - obj_x[point_counter] : obj_x[point_counter] - C1X;
 assign y_diff1 = (C1Y >= obj_y[point_counter])? C1Y - obj_y[point_counter] : obj_y[point_counter] - C1Y;
 assign x_diff2 = (C2X >= obj_x[point_counter])? C2X - obj_x[point_counter] : obj_x[point_counter] - C2X;
 assign y_diff2 = (C2Y >= obj_y[point_counter])? C2Y - obj_y[point_counter] : obj_y[point_counter] - C2Y;
 assign DONE = (next_state==Finish);
+assign distance1 = x_diff1*x_diff1 + y_diff1*y_diff1;
+assign distance2 = x_diff2*x_diff2 + y_diff2*y_diff2;
+
 
 //Set FSM
 always @(posedge CLK or posedge RST) begin
@@ -153,22 +156,22 @@ always @(posedge CLK) begin
     if(state==IDLE) coverage <= 6'd0;
     else if(state==FindCircle1&&point_counter==6'd39||state==FindCircle2&&point_counter==6'd39) coverage <= 6'd0;
     else if(state==FindCircle1) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
+        if(distance1 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else if(state==FindCircle2) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
-        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
+        if(distance1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(distance2 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else if(state==Circle1Fix&&(counter[0]!=1'b0)) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
-        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
+        if(distance1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(distance2 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else if(state==Circle2Fix&&(counter[0] != 1'd0)) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
-        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
+        if(distance1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(distance2 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else if(state==Circle1Fix||state==Circle2Fix) coverage <= 6'd0;
