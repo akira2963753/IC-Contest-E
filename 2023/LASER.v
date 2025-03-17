@@ -13,7 +13,6 @@ parameter [2:0] IDLE=3'd0,Delay1clk=3'd1,Read=3'd2,FindCircle1=3'd3,FindCircle2=
 reg [2:0] state,next_state;
 reg [3:0] obj_x[0:39];
 reg [3:0] obj_y[0:39];
-reg [5:0] read_counter;
 wire [3:0] x_diff1;
 wire [3:0] x_diff2;
 wire [3:0] y_diff1;
@@ -23,9 +22,8 @@ reg [5:0] coverage;
 reg [8:0] circle_counter;
 reg [8:0] circle_counter2;
 integer i;
-reg [4:0] counter;
-reg [5:0] temp;
-reg [3:0] fix_counter;
+reg [5:0] counter;
+reg [2:0] fix_counter;
 reg [5:0] Max_cover;
 reg [3:0] Max_C1X;
 reg [3:0] Max_C1Y;
@@ -47,30 +45,23 @@ end
 
 always @(*) begin
     case(state)
-        IDLE: next_state = (read_counter==6'd39)? FindCircle1 : IDLE;
+        IDLE: next_state = (counter==6'd39)? FindCircle1 : IDLE;
         FindCircle1: next_state = (circle_counter==9'd256)? FindCircle2 : FindCircle1;
         FindCircle2: next_state = (circle_counter2==9'd256)? Circle1Fix : FindCircle2;
-        Circle1Fix: next_state = (counter==5'd16)? Circle2Fix:Circle1Fix;
+        Circle1Fix: next_state = (counter==6'd16)? Circle2Fix:Circle1Fix;
         Circle2Fix: begin
-            if(fix_counter==4'd6) next_state = Finish;
-            else next_state = (counter==5'd16)? Circle1Fix : Circle2Fix;
+            if(fix_counter==3'd4) next_state = Finish;
+            else next_state = (counter==6'd16)? Circle1Fix : Circle2Fix;
         end
         Finish: next_state = IDLE;
         default: next_state = IDLE;
     endcase
 end
 
-//Set Read Counter
-always @(posedge CLK or posedge RST) begin
-    if(RST) read_counter <= 6'd0;
-    else if(state==IDLE) read_counter <= read_counter + 6'd1;
-    else read_counter <= 6'd0;
-end
-//Read X and Y 
 always @(posedge CLK) begin
     if(state==IDLE) begin
-        obj_x[read_counter] <= X;
-        obj_y[read_counter] <= Y;
+        obj_x[counter] <= X;
+        obj_y[counter] <= Y;
     end
     else;
 end
@@ -157,9 +148,10 @@ always @(posedge CLK) begin
     else;
 end
 
-//Find Circle 1 
+// Set Coverage
 always @(posedge CLK) begin
     if(state==IDLE) coverage <= 6'd0;
+    else if(state==FindCircle1&&point_counter==6'd39||state==FindCircle2&&point_counter==6'd39) coverage <= 6'd0;
     else if(state==FindCircle1) begin
         if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
         else;
@@ -169,14 +161,24 @@ always @(posedge CLK) begin
         else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
+    else if(state==Circle1Fix&&(counter[0]!=1'b0)) begin
+        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
+        else;
+    end
+    else if(state==Circle2Fix&&(counter[0] != 1'd0)) begin
+        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
+        else;
+    end
+    else if(state==Circle1Fix||state==Circle2Fix) coverage <= 6'd0;
     else;
 end
 
 //看看是否為最大覆蓋
 always @(posedge CLK) begin
     if(state==IDLE) begin
-	Max_cover <= 6'd0;
-	{Max_C1X,Max_C1Y,Max_C2X,Max_C2Y} <= 16'd0;
+	{Max_cover,Max_C1X,Max_C1Y,Max_C2X,Max_C2Y} <= 22'd0;
     end
     else if(state==FindCircle1 && point_counter==6'd39) begin //計數到第40個的時候 紀錄一下目前大小
         if(coverage > Max_cover) begin
@@ -185,7 +187,6 @@ always @(posedge CLK) begin
             Max_C1Y <= C1Y;
         end
         else;
-        coverage <= 6'd0;
     end
     else if(state==FindCircle2 && point_counter==6'd39) begin //計數到第40個的時候 紀錄一下目前大小
         if(coverage > Max_cover) begin
@@ -194,19 +195,18 @@ always @(posedge CLK) begin
             Max_C2Y <= C2Y;
         end
         else;
-        coverage <= 6'd0;
     end
     else if(state==Circle1Fix&&(counter[0] == 1'd0)) begin
-        if(Max_cover <= temp) begin
-            Max_cover <= temp;
+        if(Max_cover <= coverage) begin
+            Max_cover <= coverage;
             Max_C1X <= C1X;
             Max_C1Y <= C1Y;
         end
         else;
     end
     else if(state==Circle2Fix&&(counter[0] == 1'd0)) begin
-        if(Max_cover <= temp) begin
-            Max_cover <= temp;
+        if(Max_cover <= coverage) begin
+            Max_cover <= coverage;
             Max_C2X <= C2X;
             Max_C2Y <= C2Y;
         end
@@ -216,45 +216,20 @@ always @(posedge CLK) begin
 end
 
 //Set counter
-always @(posedge CLK) begin
-    if(state==IDLE) counter <= 6'd0;
-    else if(state==Circle1Fix&&(counter[0] == 1'd0)) counter <= (counter==5'd16)? 5'd0 : counter + 6'd1;
+always @(posedge CLK or posedge RST) begin
+    if(RST) counter <= 6'd0;
+    else if(state==IDLE) counter <= counter + 6'd1;
+    else if(state==Circle1Fix&&(counter[0] == 1'd0)) counter <= (counter==6'd16)? 6'd0 : counter + 6'd1;
     else if(state==Circle1Fix&&point_counter==6'd39) counter <= counter + 6'd1;
-    else if(state==Circle2Fix&&(counter[0] == 1'd0)) counter <= (counter==5'd16)? 5'd0 : counter + 6'd1;
+    else if(state==Circle2Fix&&(counter[0] == 1'd0)) counter <= (counter==6'd16)? 6'd0 : counter + 6'd1;
     else if(state==Circle2Fix&&point_counter==6'd39) counter <= counter + 6'd1;
     else;
 end
 
-//設定其他25宮格的Coverage Temp
-always @(posedge CLK) begin
-    if(state==IDLE) temp <= 6'd0;
-    else if(state==Circle1Fix&&(counter[0] != 1'd0)) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) begin
-            temp <= temp + 6'd1;
-        end
-        else begin
-            if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) begin
-                temp <= temp + 6'd1;
-            end
-        end
-    end
-    else if(state==Circle2Fix&&(counter[0] != 1'd0)) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) begin
-            temp <= temp + 6'd1;
-        end
-        else begin
-            if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) begin
-                temp <= temp + 6'd1;
-            end
-        end
-    end
-    else temp <= 6'd0;
-end
-
 //Set 迭代計數器
 always @(posedge CLK) begin
-    if(state==IDLE) fix_counter <= 2'd0;
-    else if(state==Circle2Fix&&counter==5'd16) fix_counter <= fix_counter + 4'd1;
+    if(state==IDLE) fix_counter <= 3'd0;
+    else if(state==Circle2Fix&&counter==6'd16) fix_counter <= fix_counter + 3'd1;
     else; 
 end
 
