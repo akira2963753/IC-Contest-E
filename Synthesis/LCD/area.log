@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : LCD_CTRL
+Version: O-2018.06
+Date   : Sun Mar 16 23:44:29 2025
+****************************************
+
+Library(s) Used:
+
+    slow (File: /home/wuyifan/Desktop/ICContest/Lib/slow.db)
+
+Number of ports:                          151
+Number of nets:                          5926
+Number of cells:                         5771
+Number of combinational cells:           5216
+Number of sequential cells:               551
+Number of macros/black boxes:               0
+Number of buf/inv:                        687
+Number of references:                     174
+
+Combinational area:              55593.244464
+Buf/Inv area:                     5976.545411
+Noncombinational area:           19284.161909
+Macro/Black Box area:                0.000000
+Net Interconnect area:          958538.147186
+
+Total cell area:                 74877.406373
+Total area:                    1033415.553559
+1

@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : geofence
+Version: O-2018.06
+Date   : Sun Mar 16 23:37:22 2025
+****************************************
+
+Library(s) Used:
+
+    slow (File: /home/wuyifan/Desktop/ICContest/Lib/slow.db)
+
+Number of ports:                          439
+Number of nets:                          2307
+Number of cells:                         1590
+Number of combinational cells:           1408
+Number of sequential cells:               171
+Number of macros/black boxes:               0
+Number of buf/inv:                        301
+Number of references:                      63
+
+Combinational area:              17031.711671
+Buf/Inv area:                     1247.588979
+Noncombinational area:            4790.062792
+Macro/Black Box area:                0.000000
+Net Interconnect area:          218961.098511
+
+Total cell area:                 21821.774463
+Total area:                     240782.872974
+1
