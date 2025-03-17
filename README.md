@@ -1,6 +1,6 @@
 ## Recode : 
 
-| 年份 | Cycle數 | Total Cell Area  | 等級 |
+| 年份 | Cycle | Total Cell Area  | Grade |
 |------|---------|-------|------|
 | 2018 | 5       | 74877 | A    |
 | 2021 | 6       | 21821 | A    |
