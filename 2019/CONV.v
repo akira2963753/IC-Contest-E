@@ -20,8 +20,9 @@ parameter signed bias = 20'h01310;
 reg [2:0] state,next_state;
 reg signed [19:0] image_data[0:65][0:65];
 reg signed [39:0] result; 
-wire [65:0] x,y;
-wire signed [19:0] kernal;
+wire [6:0] x;
+wire [6:0] y;
+reg signed [19:0] kernal;
 reg [3:0] counter;
 reg [6:0] set_zero_cnt;
 reg load;
@@ -32,7 +33,6 @@ assign y = iaddr >> 6;
 
 assign busy = (state!=IDLE); // 當狀態不在IDLE時，即在忙碌中...
 assign cwr = (state==Write||state==MaxPool||state==Finish); //寫入記憶體 
-Kernel_block u0(counter,kernal);
 
 // Set FSM
 always @(posedge clk or posedge reset) begin
@@ -54,7 +54,7 @@ always @(*) begin
 end
 
 //Set set_zero_cnt 
-always @(posedge clk or reset) begin
+always @(posedge clk or posedge reset) begin
 	if(reset) set_zero_cnt <= 7'd0;
 	else if(state==IDLE) set_zero_cnt <= set_zero_cnt + 7'd1;
 	else set_zero_cnt <= 7'd0;
@@ -143,27 +143,21 @@ always @(posedge clk) begin
 	else if(next_state==MaxPool) csel <= 3'b011;
 	else;
 end
-endmodule
 
-
-module Kernel_block(
-	input [3:0] counter,
-	output reg signed [19:0] kernal
-);
-	always @(*) begin
-		case(counter)
-			4'd0: kernal = 20'h0A89E;
-			4'd1: kernal = 20'h092D5;
-			4'd2: kernal = 20'h06D43;
-			4'd3: kernal = 20'h01004;
-			4'd4: kernal = 20'hF8F71;
-			4'd5: kernal = 20'hF6E54;
-			4'd6: kernal = 20'hFA6D7;
-			4'd7: kernal = 20'hFC834;
-			4'd8: kernal = 20'hFAC19;
-			default: kernal = 20'd0;
-		endcase
-	end
+always @(*) begin
+	case(counter)
+		4'd0: kernal = 20'h0A89E;
+		4'd1: kernal = 20'h092D5;
+		4'd2: kernal = 20'h06D43;
+		4'd3: kernal = 20'h01004;
+		4'd4: kernal = 20'hF8F71;
+		4'd5: kernal = 20'hF6E54;
+		4'd6: kernal = 20'hFA6D7;
+		4'd7: kernal = 20'hFC834;
+		4'd8: kernal = 20'hFAC19;
+		default: kernal = 20'd0;
+	endcase
+end
 endmodule
 
 
