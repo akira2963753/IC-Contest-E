@@ -19,7 +19,7 @@ wire [3:0] x_diff2;
 wire [3:0] y_diff1;
 wire [3:0] y_diff2;
 reg [5:0] point_counter;
-reg [5:0] coverage[0:255];
+reg [5:0] coverage;
 reg [8:0] circle_counter;
 reg [8:0] circle_counter2;
 integer i;
@@ -159,16 +159,14 @@ end
 
 //Find Circle 1 
 always @(posedge CLK) begin
-    if(state==IDLE) for(i=0;i<225;i=i+1) coverage[i] <= 6'd0;
+    if(state==IDLE) coverage <= 6'd0;
     else if(state==FindCircle1) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage[circle_counter] <= coverage[circle_counter] + 6'd1;
+        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else if(state==FindCircle2) begin
-        if(x_diff1*x_diff1 + y_diff1*y_diff1 > 13'd16) begin
-            if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage[circle_counter2] <= coverage[circle_counter2] + 6'd1;
-            else;
-        end
+        if(x_diff1*x_diff1 + y_diff1*y_diff1 <= 13'd16) coverage <= coverage + 6'd1;
+        else if(x_diff2*x_diff2 + y_diff2*y_diff2 <= 13'd16) coverage <= coverage + 6'd1;
         else;
     end
     else;
@@ -181,20 +179,22 @@ always @(posedge CLK) begin
 	{Max_C1X,Max_C1Y,Max_C2X,Max_C2Y} <= 16'd0;
     end
     else if(state==FindCircle1 && point_counter==6'd39) begin //計數到第40個的時候 紀錄一下目前大小
-        if(coverage[circle_counter] >= Max_cover) begin
-            Max_cover <= coverage[circle_counter];
+        if(coverage > Max_cover) begin
+            Max_cover <= coverage;
             Max_C1X <= C1X;
             Max_C1Y <= C1Y;
         end
         else;
+        coverage <= 6'd0;
     end
     else if(state==FindCircle2 && point_counter==6'd39) begin //計數到第40個的時候 紀錄一下目前大小
-        if(coverage[circle_counter2] >= Max_cover) begin
-            Max_cover <= coverage[circle_counter2];
+        if(coverage > Max_cover) begin
+            Max_cover <= coverage;
             Max_C2X <= C2X;
             Max_C2Y <= C2Y;
         end
         else;
+        coverage <= 6'd0;
     end
     else if(state==Circle1Fix&&(counter[0] == 1'd0)) begin
         if(Max_cover <= temp) begin
