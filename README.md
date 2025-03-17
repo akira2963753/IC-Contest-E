@@ -1,5 +1,5 @@
 ## IC-Contest : 
-| 年份 | 賽別 |Cycle | Total Cell Area  | Grade |
+| 年份 | 賽別 | Number of Cycle | Total Cell Area  | Grade |
 |------|-----|---------|-------|------|
 | 2018 | 初賽  |2235        | 74877 | A    |
 | 2019 | 初賽  |             |       |       |
