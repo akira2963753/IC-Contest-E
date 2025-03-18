@@ -6,7 +6,7 @@
 |  GEOFENCE   | 2021 | 初賽  | 502470       | 21821 | A    |       |
 |  JAM   | 2022 | 初賽  | 580991       | 7042 | A    |        |
 |  LASER   | 2023 | 初賽  | 24444       | 24240    |   A    |   Cover Total : 170/170    |
-|     | 2024 | 初賽  |             |       |       |        |
+|  BICUBIC   | 2024 | 初賽  |             |       |       |        |
 
 歷屆試題皆可從官網上下載  
 https://proj.moe.edu.tw/moeisoc/cl.aspx?n=6129 
