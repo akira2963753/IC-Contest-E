@@ -1,0 +1,30 @@
+ 
+****************************************
+Report : area
+Design : LASER
+Version: O-2018.06
+Date   : Mon Mar 17 23:43:37 2025
+****************************************
+
+Library(s) Used:
+
+    slow (File: /home/b11107056/Desktop/marco/2023/DC/db/slow.db)
+
+Number of ports:                           63
+Number of nets:                          1430
+Number of cells:                         1312
+Number of combinational cells:            910
+Number of sequential cells:               400
+Number of macros/black boxes:               0
+Number of buf/inv:                        150
+Number of references:                     149
+
+Combinational area:              10557.827915
+Buf/Inv area:                     1344.340795
+Noncombinational area:           13682.741735
+Macro/Black Box area:                0.000000
+Net Interconnect area:          174300.897278
+
+Total cell area:                 24240.569650
+Total area:                     198541.466928
+1
