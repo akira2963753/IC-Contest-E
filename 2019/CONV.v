@@ -20,19 +20,36 @@ parameter signed bias = 20'h01310;
 reg [2:0] state,next_state;
 reg signed [19:0] image_data[0:65][0:65];
 reg signed [39:0] result; 
-wire [6:0] x;
-wire [6:0] y;
+wire [65:0] x,y;
 reg signed [19:0] kernal;
 reg [3:0] counter;
 reg [6:0] set_zero_cnt;
 reg load;
 
+assign caddr_rd = 12'd0;
+assign crd = 1'b0;
 // x = iaddr % 64 、 y = iaddr / 64
 assign x = iaddr[5:0]; 
 assign y = iaddr >> 6; 
 
 assign busy = (state!=IDLE); // 當狀態不在IDLE時，即在忙碌中...
 assign cwr = (state==Write||state==MaxPool||state==Finish); //寫入記憶體 
+always @(*) begin
+	case(counter)
+		4'd0: kernal = 20'h0A89E;
+		4'd1: kernal = 20'h092D5;
+		4'd2: kernal = 20'h06D43;
+		4'd3: kernal = 20'h01004;
+		4'd4: kernal = 20'hF8F71;
+		4'd5: kernal = 20'hF6E54;
+		4'd6: kernal = 20'hFA6D7;
+		4'd7: kernal = 20'hFC834;
+		4'd8: kernal = 20'hFAC19;
+		default: kernal = 20'd0;
+	endcase
+end
+
+
 
 // Set FSM
 always @(posedge clk or posedge reset) begin
@@ -48,7 +65,7 @@ always @(*) begin
 		Conv: next_state = (iaddr==12'd4095&&load==1'b1)? Write : Conv;
 		Write : next_state = (caddr_wr==12'd4095)? MaxPool : Write;
 		MaxPool : next_state = (iaddr==12'd4030)? Finish : MaxPool;
-		Finish: next_state = Finish;
+		Finish: next_state = IDLE;
 		default;
 	endcase
 end
@@ -62,7 +79,7 @@ end
 
 //Set iaddr 
 always @(posedge clk) begin
-	if(reset) iaddr <= 12'd0;
+	if(state==IDLE) iaddr <= 12'd0;
 	else if(state==Read||(state==Write&&next_state!=MaxPool)) iaddr <= iaddr + 12'd1;
 	else if(state==Conv&&iaddr==12'd4095&&load==1'b1) iaddr <= 12'd0;
 	else if(state==Conv&&load==1'b1) iaddr <= iaddr + 12'd1;
@@ -75,7 +92,7 @@ always @(posedge clk) begin
 end
 
 //Set Counter
-always @(posedge clk ) begin
+always @(posedge clk) begin
 	if(state==IDLE) {counter,load} <= 5'd0;
 	else if(counter==4'd8&&load==1'b0) begin //讓他在數到第八後變 0 
 		load <= 1'b1;
@@ -143,22 +160,9 @@ always @(posedge clk) begin
 	else if(next_state==MaxPool) csel <= 3'b011;
 	else;
 end
-
-always @(*) begin
-	case(counter)
-		4'd0: kernal = 20'h0A89E;
-		4'd1: kernal = 20'h092D5;
-		4'd2: kernal = 20'h06D43;
-		4'd3: kernal = 20'h01004;
-		4'd4: kernal = 20'hF8F71;
-		4'd5: kernal = 20'hF6E54;
-		4'd6: kernal = 20'hFA6D7;
-		4'd7: kernal = 20'hFC834;
-		4'd8: kernal = 20'hFAC19;
-		default: kernal = 20'd0;
-	endcase
-end
 endmodule
+
+
 
 
 
